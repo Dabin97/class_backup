@@ -1,0 +1,46 @@
+<style>
+	nav{
+	width: 1200px;
+	margin:0 auto;
+	}
+	nav > ul{
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		list-style-type: none;
+	}
+	nav > ul > li{
+		width: 200px;
+	}
+</style>
+	<!-- 로그인이 안되어 있으면 로그인 페이지로 이동 -->
+    <th:block th:if="${session.dto == null}">
+    	<script>
+    		location.href="/";
+    	</script>
+	</th:block>
+
+
+
+<!-- 회원등급이 6이면 관리자이므로 홈 게시판 회원관리 메뉴를 출력   -->
+<th:block th:if="${session.dto != null}" th:switch="${session.dto.gradeNo}"><!--조건식을 2개 쓸수있다. if와 switch를 같이 쓸수있다.-->
+	<nav th:case="6">
+		<ul>
+			<li><a href="/main">홈</a></li>
+			<li><a href="/member/admin">회원관리</a></li>
+			<li><a href="/grade/view">등급관리</a></li>
+			<li><a href="/qna/admin">QnA</a></li>
+			<li><a href="/logout">로그아웃</a></li>
+		</ul>
+	</nav>
+	<nav th:case="*">
+		<ul>
+			<li><a href="/main">홈</a></li>
+			<li><a href="/qna/member">QnA</a></li>
+			<li><a href="#">개인정보 수정</a></li>
+			<li><a href="/logout">로그아웃</a></li>
+		</ul>
+	</nav>
+</th:block>
+<hr>
+

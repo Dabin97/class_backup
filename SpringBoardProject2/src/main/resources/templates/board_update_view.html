@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <title>글수정 페이지</title>
+  <style type="text/css">
+	#container{
+		/* background-color: lime; */
+		width:1200px;
+		margin:0 auto;
+	}
+	#container table{
+		width:600px;
+		border-collapse: collapse;
+		margin:0 auto;
+	}
+	#container th{
+		width:150px !important;
+		text-align: right;
+		padding:5px;
+	}
+	#container td{
+		width: 500px;
+		padding:5px;
+		height: 40px;
+	}
+	#container input{
+		width: 100%;
+		height:40px;
+		box-sizing:border-box;
+		border-width : 1px;
+		border-radius: 5px;
+	}
+	h2{
+		text-align: center;
+	}
+	.btn{
+		text-decoration: none;
+		background-color: #e8e8e8;
+		width: 80px;
+		display: inline-block;
+		padding:5px 0px;
+		font-weight:normal;
+		border : 1px solid #585858;
+		text-align:center;
+		color : black;
+		font-size:14px;
+		box-sizing: border-box;
+	}
+	.btn:hover{
+		background-color: #282828;
+		color:#FFFFFF
+	}
+	textarea {
+		width:100%;
+		height: 300px;
+		resize: none;
+		box-sizing: border-box;
+	}
+	p input{
+		width:80% !important;
+	}
+    .file input{
+        width : 16px !important;
+        height : 16px !important;
+    }
+
+</style>
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="/js/ckeditor.js"></script>
+<script src="/js/UploadAdapter.js"></script>
+<script>
+    function uploadAdapterPlugin(editor){
+		editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+	        return new UploadAdapter(loader)
+	    }
+	}
+	$(function(){
+		var count = 3;//첨부파일 태그 개수
+		$("#plus").click(function(){
+			if(count == 5) return;
+			count++;
+			$("#file_form").append("<p><input type='file' name='file'></p>");
+		});
+		$("#minus").click(function(){
+			if(count == 1) return;
+				$(this).parent().parent().children("p").last().remove();
+			count--;
+		});
+		var editor;
+		ClassicEditor.create($("#content")[0],{
+			extraPlugins:[uploadAdapterPlugin]
+		})
+		.then(editor => {
+			console.log("에디터 초기화 완료",editor);
+			myEditor = editor;
+		}).catch(error =>{
+			console.log(error);
+		});
+	});
+</script>
+<body>
+
+<th:block th:include="@{/fragments/header}"></th:block>
+<div id="container">
+  <h2>글쓰기 페이지</h2>
+  <form action="/board/update" enctype="multipart/form-data" method="post">
+    <input type="hidden" name="bno" th:value="${board.bno}">
+    <table>
+      <tr>
+        <th>제목</th>
+        <td><input type="text" name="title" th:value="${board.title}"></td>
+      </tr>
+      <tr>
+        <th>작성자</th>
+        <td>
+          <input type="hidden" name="writer" th:value="${board.writer }">
+          [[${board.writer}]]
+        </td>
+      </tr>
+      <tr>
+        <th style="vertical-align: top;">내용</th><td><textarea name="content" id="content">[[${board.content }]]</textarea></td>
+      </tr>
+      <!-- 기존 첨부 파일 -->
+      <tr>
+        <td colspan="2" class="file">
+          첨부파일<br>
+          <th:block th:each="f : ${fList}">
+            [[${f.fileName}]] <label><input type="checkbox" name="del_file" th:value="${f.fno}"> 삭제</label> <br>
+            <!-- 해당 파일이 이미지인지? -->
+            <th:block th:if="${f.type =='image' }">
+              <img th:src="@{/filedown(bno=${f.bno },fno=${f.fno})}" style="width:500px;">
+            </th:block>
+            <br>
+          </th:block>
+        </td>
+      </tr>
+      <!-- 새 첨부 파일 -->
+      <tr>
+        <td colspan="2" id="file_form">
+          <p><input type="file" name="file">
+            <button type="button" id="plus">+</button> <button type="button" id="minus">-</button></p>
+          <p><input type="file" name="file"></p>
+          <p><input type="file" name="file"></p>
+        </td>
+      </tr>
+      <tr>
+          <td style="text-align: right;">
+          <a href="javascript:history.back();" class="btn">뒤로가기</a>
+          <button class="btn">수정하기</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+</body>
+</html>

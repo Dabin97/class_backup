@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>로그 페이지</title>
+<script src="/js/jquery-3.6.3.js"></script>
+<script>
+	$(function(){
+		setInterval(function() {
+			console.log($('.log_table > tbody > tr').first().children().first().text())
+			$.ajax({
+				url : '/log/new_log',
+				// data : `date=${$('.log_table > tbody > tr').first().children().first().text()}`,
+				data : `date=2023-03-30 11:11:00`,
+				type:'post',
+				dataType:'json',
+				success:function(r){
+					console.log(r);
+					//tbody에 데이터를 끼워넣기
+					if(r.length == 0) return;
+					let tag = '';
+				    tag = r.reduce((prev,curr) => prev + `<tr><td>${curr.logTime}</td><td>${curr.runMethod}</td><td>${curr.writer}</td><td>${curr.updateData}</td></tr>`,``)
+                    //reduce를 사용하면 코드가 더 간편해짐(prev,curr)=(이전값,현재값), curr는 첫번째 배열부터 들어옴. 이전꺼를 현재에 붙여넣기? 맨처음에 값이 없으니 ,``빈값을 넣어줌
+                    //reduce는 배열의 각 요소에 대해 callback을 실행하며 단 1개의 출력 결과를 만듭니다.
+
+                    // $.each(r,function(idx,obj){
+					// 	tag += `<tr>`;
+					// 	tag += `<td>${obj.logTime}</td>`;
+					// 	tag += `<td>${obj.runMethod}</td>`;
+					// 	tag += `<td>${obj.writer}</td>`;
+					// 	tag += `<td>${obj.updateData}</td>`;
+					// 	tag += `</tr>`;
+					// });
+					console.log(tag);
+					$(".log_table > tbody").prepend(tag);
+				}
+			});
+		}, 1000);
+	});
+
+</script>
+
+
+<style>
+    .container{
+        width: 1200px;
+        height: 600px;
+        margin: 0 auto;
+        overflow-y: scroll;
+    }
+    .log_table{
+        width: 100%;
+        border-collapse: collapse;
+        box-sizing: border-box;
+    }
+    .log_table td, .log_table tr{
+        padding: 10px 20px;
+        border: 1px solid black;
+        box-sizing: border-box;
+    }
+</style>
+
+</head>
+<body>
+    <th:block th:include="/fragments/header.html"></th:block>
+    <div class="container">
+        <table class="log_table">
+            <thead>
+                <tr>
+                    <td>발생시간</td>
+                    <td>기능</td>
+                    <td>작업자</td>
+                    <td>내용</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="log : ${list}">
+					<!-- <td>[[${log.logTime}]]</td> -->
+					<td th:text="${log.logTime}"></td> 
+					<td th:text="${log.runMethod}"></td> <!-- th:text로 뽑지않으면 내용이 출력되지않는다.-->
+					<td th:text="${log.writer}"></td>
+					<td th:text="${log.updateData}"></td>
+				</tr>
+
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

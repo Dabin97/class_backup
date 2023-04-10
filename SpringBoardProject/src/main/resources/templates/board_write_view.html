@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style type="text/css">
+	section{
+		width: 1200px;
+		margin:0 auto;
+	}
+	
+	section form {
+		display: flex;
+		flex-direction: column;  
+	}
+	form > * {
+		margin-top :10px;
+	}
+	.form_bar > button{
+		width: 50%;
+		box-sizing: border-box;
+		font-size: 20px;
+		height: 50px;
+		
+	}
+	section h2{
+		text-align: center;
+	}
+	section form > input{
+		height: 30px;
+		font-size: 20px;
+	}
+	section form > textarea{
+		height: 300px;
+		font-size: 20px;
+		resize: none;
+	}
+	.ck-editor__editable {
+            min-height: 500px;
+	}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="/js/ckeditor.js"></script>
+<script src="/js/UploadAdapter.js"></script>
+<script type="text/javascript">
+	function uploadAdapterPlugin(editor){
+		editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+	        return new UploadAdapter(loader)
+	    }
+	}
+	$(function() {
+		var count = 3;
+		$("#plus").click(function(){
+			if(count == 5) return;
+			count++;
+			$('.file_form').append(`<p><input type="file" name="file"></p>`);
+		});
+		$("#minus").click(function(){
+			if(count == 1) return;
+			$('.file_form').children("p").last().remove();
+			count--;
+		});
+		//생성한 에디터를 저장할 변수
+		var editor;
+		//에디터를 생성하는 함수
+		ClassicEditor.create($("#content")[0],{
+			extraPlugins: [uploadAdapterPlugin]
+		}).then(editor =>{
+			console.log("에디터 초기화 완료");
+			myEditor = editor;
+		}).catch(error => {
+			console.error(error);
+		});
+	});
+</script>
+</head>
+<body>
+	<th:block th:include="/fragments/header.html"></th:block>
+
+	<section>
+		<h2>글쓰기</h2>
+		<form action="/board/add" method="post" enctype="multipart/form-data">
+			<input type="hidden" name="writer" th:value="${session.dto.id }">
+			<input type="text" name="title" placeholder="제목을 입력하세요">
+			<textarea name="content" id="content" placeholder="내용을 입력하세요"></textarea>
+			<div class="file_form">
+				<p><input type="file" name="file">
+					<button type="button" id="plus">+</button>
+					<button type="button" id="minus">-</button>
+				</p>
+				<p><input type="file" name="file"></p>
+				<p><input type="file" name="file"></p>
+			</div>
+			<div class="form_bar">
+				<button type="submit" class="btn_submit">글쓰기</button><button type="button" class="btn_back">뒤로가기</button>
+			</div>
+			
+		</form>
+	</section>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style type="text/css">
+    h2{
+        text-align: center;
+    }
+    .container table{
+        width: 800px;
+        margin:0 auto;
+    }
+    .container td{
+        text-align: center;
+        padding:5px;
+    }
+    
+    .page_bar{
+        position:relative;
+        text-align: center;
+    }
+    .page_bar a:link,.page_bar a:visited {
+        color:black;
+        text-decoration: none;
+        font-size : 18px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    .page_bar a:hover{
+        font-weight: bold;
+        color:red;
+    }
+</style>
+</head>
+<body>
+	<th:block th:include="/fragments/header"></th:block>
+	<div class="container">
+		<h2>문의 내역</h2>
+		<table>
+			<tr>
+				<th>순번</th>
+				<th>제목</th>
+				<th>작성자</th>
+				<th>작성일</th>
+				<th>현재상태</th>
+			</tr>
+			<tr th:each="obj : ${list}">
+				<td th:text="${obj.qno}"></td>
+				<td><a th:href="@{/qna/admin/detail/{qno}(qno=${obj.qno})}" th:text="${obj.title}"></a></td>
+				<td th:text="${obj.writer}"></td>
+				<td th:text="${obj.wdate}"></td>
+				<td th:if="${obj.status} == 0">않읽음</td>
+				<td th:if="${obj.status} == 1">읽음</td>
+				<td th:if="${obj.status} == 2">답변완료</td>
+			</tr>
+			<tr>
+				<td colspan="5">
+					<a th:if="${pagging.priviousPageGroup }" th:href="@{/qna/admin/list(pageNo=${pagging.startPageOfPageGroup - 1})}">◀</a>	
+					<th:block th:each = "i : ${#numbers.sequence(pagging.startPageOfPageGroup,pagging.endPageOfPageGroup)}">
+
+					<a th:if="${i == pagging.currentPageNo }" class="current_page" th:text="${i}"></a>
+					
+					<a th:if="${i != pagging.currentPageNo }" th:href="@{/qna/admin/list(pageNo=${i})}" th:text="${i}"></a>
+					
+					</th:block>
+					<a th:if="${pagging.nextPageGroup }" th:href="@{/qna/admin/list(pageNo=${pagging.endPageOfPageGroup + 1})}">▶</a>
+				</td>
+			</tr>
+		</table>
+
+	</div>
+</body>
+</html>

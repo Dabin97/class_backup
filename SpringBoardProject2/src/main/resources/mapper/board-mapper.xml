@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.board.mapper.BoardMapper">
+	<select id="selectBoardBno" resultType="int">
+		select board_bno_seq.nextval from dual
+	</select>
+	<select id="selectBoardCount" resultType="int">
+		select count(*) from board_view
+	</select>
+	<insert id="insertBoard" parameterType="board">
+		insert into board(bno, writer, title,content) values(
+			#{bno},#{writer}, #{title},#{content}
+		)
+	</insert>
+	<insert id="insertFile" parameterType="file">
+		insert into board_file 
+		values(#{bno},(SELECT nvl(max(fno),0) FROM board_file WHERE bno = #{bno})+1,#{path})
+	</insert>
+	<select id="selectAllBoard" resultType="board">
+		select 
+			(select count(*) from board_like bl where bl.bno = b.bno) as blike, 
+			(select count(*) from board_hate bh where bh.bno = b.bno) as bhate,
+			bno,title,writer,bdate,bcount,content
+		from board b
+	</select>
+	<select id="selectBoardList" resultType="board" parameterType="hashMap">
+		SELECT * FROM BOARD_VIEW WHERE ceil(rw / #{contentCount}) = #{pageNo}
+	</select>
+	<select id="selectBoard" resultType="board" parameterType="int">
+		select 
+		(select count(*) from board_like where bno = #{bno}) as blike, 
+		(select count(*) from board_hate where bno = #{bno}) as bhate,
+		bno,title,writer,bdate,bcount,content
+		from board where bno = #{bno}
+	</select>
+	<select id="selectFile" parameterType="hashMap" resultType="file">
+		select * from board_file where bno = #{bno} and fno = #{fno}
+	</select>
+	<select id="selectFileList" resultType="file" parameterType="int">
+		select * from board_file where bno = #{bno} order by fno
+	</select>
+	<update id="updateBoardCount" parameterType="int">
+		update board set bcount = bcount + 1 where bno = #{bno}
+	</update>
+	<delete id="deleteBoard" parameterType="int">
+		delete from board where bno = #{bno}
+	</delete>
+	<update id="updateBoard" parameterType="board">
+		update board set title=#{title}, content=#{content} where bno = #{bno}
+	</update>
+	<select id="deleteFileList" parameterType="hashMap" resultType="string">
+		select path from board_file where bno = #{bno} and 
+		fno in
+		<foreach collection="fno" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</select>
+	<delete id="deleteFile" parameterType="hashMap">
+		delete from board_file where bno = #{bno}
+		<if test="fno != null">
+		and fno in
+			<foreach collection="fno" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if> 
+	</delete>
+	<insert id="insertBoardLike" parameterType="hashMap">
+		insert into board_like values(#{bno},#{id})
+	</insert>
+	<select id="selectBoardLike" parameterType="int" resultType="int">
+		select count(*) from board_like where bno = #{bno} 
+	</select>
+	<delete id="deleteBoardLike" parameterType="hashMap">
+		delete from board_like where bno = #{bno} and id = #{id}
+	</delete>
+	<insert id="insertBoardHate" parameterType="hashMap">
+		insert into board_hate values(#{bno},#{id})
+	</insert>
+	<select id="selectBoardHate" parameterType="int" resultType="int">
+		select count(*) from board_hate where bno = #{bno} 
+	</select>
+	<delete id="deleteBoardHate" parameterType="hashMap">
+		delete from board_hate where bno = #{bno} and id = #{id}
+	</delete>
+	<insert id="insertBoardComment" parameterType="comment">
+		insert into board_comment(cno,bno,writer,content)
+		values(board_comment_seq.nextval, #{bno},#{writer},#{content})
+	</insert>
+	<select id="selectCommentList" parameterType="int" resultType="comment">
+		select
+			cno, bno, writer, cdate, content, 
+			(select count(*) from board_comment_like bcl where bcl.cno = bc.cno) as clike,
+			(select count(*) from board_comment_hate bch where bch.cno = bc.cno) as chate		
+		from board_comment bc
+		where bno = #{bno}
+	</select>
+	<delete id="deleteBoardComment" parameterType="int">
+		delete from board_comment where cno = #{cno}
+	</delete>
+	
+	<delete id="deleteCommentLikeHate" parameterType="hashMap">
+		delete from 
+		<choose>
+			<when test="mode.equals('btn_comment_like')">
+				board_comment_like
+			</when>
+			<otherwise>
+				board_comment_hate
+			</otherwise>
+		</choose>
+		where cno = #{cno}
+	</delete>
+	<insert id="insertCommentLikeHate" parameterType="hashMap">
+		insert into  
+		<choose>
+			<when test="mode.equals('btn_comment_like')">
+				board_comment_like
+			</when>
+			<otherwise>
+				board_comment_hate
+			</otherwise>
+		</choose>
+		values(#{cno},#{writer})
+	</insert>
+	<select id="selectImageFileNo" resultType="int">
+		select bi_fno_seq.nextval from dual
+	</select>
+	<insert id="insertBoardImage" parameterType="hashMap">
+		insert into board_image  values(#{fno},#{path})
+	</insert>
+	<select id="selectImageFile" parameterType="int" resultType="file">
+		select * from board_image where fno = #{fno}
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

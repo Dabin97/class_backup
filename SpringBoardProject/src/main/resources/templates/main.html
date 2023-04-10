@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style type="text/css">
+	
+	section{
+		width: 1200px;
+		margin:0 auto;
+	}
+	section table{
+		width: 90%;
+		border-collapse: collapse;
+	}
+	section table td,section table th{
+		border:1px solid black;
+		text-align: center;
+		padding:10px 0px;
+	}
+	section tfoot{
+		font-size: 0px;
+	}
+	section tfoot a:link,section tfoot a:visited{
+		display: inline-block;
+		padding:0px 10px;
+		text-decoration: none;
+		color:black;
+		font-size: 16px !important;
+	}
+	
+	.current_page{
+		display: inline-block;
+		padding:0px 10px;
+		font-size: 16px !important;
+		color:red;
+		font-weight: bold;
+	}
+	tfoot > tr > td{
+		position: relative;
+	}
+	.btn_write{
+		display: inline-block;
+		padding:0px 20px !important;
+		position: absolute;
+		right:0px;
+	}
+</style>
+</head>
+<body>
+		<th:block th:include="/fragments/header.html"></th:block>
+		<section>
+			<table>
+				<thead>
+					<tr>
+						<th>글번호</th>
+						<th>제목</th>
+						<th>닉네임</th>
+						<th>작성일</th>
+						<th>조회수</th>
+						<th>좋아요</th>
+						<th>싫어요</th>
+					</tr>
+				</thead>
+				<tbody>
+				<!-- 게시글 목록  -->
+					<tr th:each="board : ${list}">
+						<td>[[${board.bno }]]</td>
+						<td><a th:href="@{/board/content/{bno}(bno=${board.bno })}">[[${board.title }]]</a></td>
+						<td>[[${board.writer }]]</td>
+						<td>[[${board.bdate }]]</td>
+						<td>[[${board.bcount }]]</td>
+						<td>[[${board.blike }]]</td>
+						<td>[[${board.bhate }]]</td>
+
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="7">
+							<!-- 이전 페이지 그룹으로 이동 -->
+							<a th:if="${pagging.priviousPageGroup }" th:href="@{/main(pageNo=${pagging.startPageOfPageGroup - 1})}">◀</a>							
+							
+							<!-- 
+								페이징 결과 출력
+									PaggingVO에 있는 getStartPageOfPageGroup
+													getEndPageOfPageGroup
+									이용해서 Thymeleaf를 이용해서 게시판 페이지 번호를 출력	
+							 -->
+							<th:block th:each = "i : ${#numbers.sequence(pagging.startPageOfPageGroup,pagging.endPageOfPageGroup)}">
+
+							<!-- 현재 페이지 번호는 링크를 제거하고 글자를 빨간색으로 변경 -->
+							<a th:if="${i == pagging.currentPageNo }" class="current_page" th:text="${i}"></a>
+							
+							<!-- 현재 페이지 번호가 아닌 페이지 번호는 링크를 생성 -->						
+							<a th:if="${i != pagging.currentPageNo }" th:href="@{/main(pageNo=${i})}" th:text="${i}"></a>
+							
+							</th:block>
+							 	
+							 <!-- 다음 페이지 그룹으로 이동 
+							 		>>를 클릭시 다음 그룹의 첫번째 페이지로 이동
+							 -->	
+								<a th:if="${pagging.nextPageGroup }" th:href="@{/main(pageNo=${pagging.endPageOfPageGroup + 1})}">▶</a>
+							
+							<a href="/board/write" class="btn_write">글쓰기</a>
+						</td>
+					</tr>
+				</tfoot>
+			</table>		
+		</section>
+</body>
+</html>

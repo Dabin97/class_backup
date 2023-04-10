@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.member.mapper.MemberMapper">
+	<resultMap type="member" id="member">
+		<id column="id" property="id"/>
+		<result column="passwd" property="passwd"/>
+		<result column="name" property="name"/>
+		<result column="nick" property="nick"/>
+		<result column="grade_no" property="gradeNo"/>
+	</resultMap>
+	
+	<select id="login" parameterType="hashmap" resultMap="member">
+ 		select * from board_member where id = #{id} and passwd like #{passwd}
+ 	</select> 
+ 	<select id="selectAllMember" resultMap="member">
+ 		select * from board_member
+ 	</select>
+ 	<insert id="insertMember" parameterType="member">
+ 		insert into board_member values (#{id},#{passwd},#{name},#{nick},#{gradeNo})
+ 	</insert>
+ 	<delete id="deleteMember" parameterType="String">
+		delete from board_member where id = #{id}
+	</delete>
+	<select id="selectMember" parameterType="String" resultMap="member">
+ 		select * from board_member where id = #{id}
+ 	</select> 
+ 	<update id="updateMember" parameterType="member">
+		update board_member set name=#{name},passwd=#{passwd},
+		nick=#{nick},grade_no=#{gradeNo}
+		where id like #{id}
+	</update>
+	<select id="selectAllGrade" resultType="hashmap">
+		select * from board_member_grade order by grade_no
+	</select>
+	<insert id="insertGrade" parameterType="hashmap">
+		insert into board_member_grade values(#{grade_no},#{grade_name})
+	</insert>
+	<select id="selectGrade" parameterType="String" resultType="hashmap">
+		select * from board_member_grade where grade_name like '%' || #{val} || '%' order by grade_no
+	</select>
+	<update id="updateGrade" parameterType="hashmap">
+		update board_member_grade set grade_name = #{grade_name} where grade_no = #{grade_no}
+	</update>
+	<delete id="deleteGrade" parameterType="int">
+		delete board_member_grade where grade_no = #{grade_no}
+	</delete>
+	
+</mapper>

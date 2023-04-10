@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.board.mapper.BoardLogMapper">
+	<resultMap type="log" id="log">
+		<result column="log_time" property="logTime"/>
+		<result column="writer" property="writer"/>
+		<result column="update_data" property="updateData"/>
+		<result column="run_method" property="runMethod"/>
+	</resultMap>
+
+	<insert id="insertLog" parameterType="log">
+		insert into board_log(writer,update_data,run_method)
+		values(#{writer},#{updateData},#{runMethod})
+	</insert>
+
+	<select id="selectLogList" resultMap="log">
+		select * from board_log order by log_time desc
+	</select>
+	
+	<select id="selectCallList" parameterType="string" resultMap="log">
+		select * from board_log 
+		where log_time > to_date(#{log_time},'YYYY-MM-DD HH24:MI:SS')
+		order by log_time desc
+	</select>
+
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+	.container{
+		width:1200px;
+		margin: 20px auto;
+	}
+	.qna_form{
+		width: 650px;
+		margin: 0 auto;
+	}
+	.qna_form table{
+		width: 100%;
+		border-collapse: collapse;
+		box-sizing: border-box;
+	}
+	.qna_form td{
+		padding: 5px;
+	}
+	.qna_form table tr td:first-child{
+		width: 500px;
+		height: 40px;
+	}
+	.qna_form table tr td:nth-child(2){
+		height: 100px;
+	}
+	.qna_form input, .qna_form textarea{
+		width: 100%;
+		height: 100%;
+		box-sizing: border-box;
+		border-radius: 5px;
+	}
+	.qna_form textarea{
+		resize: none;
+	}
+	.qna_form button{
+		width: 100%;
+		height: 140px;
+	}
+	.btn_submit {
+		box-shadow: inset 0px 1px 0px 0px #bbdaf7;
+		background: linear-gradient(to bottom, #79bbff 5%, #378de5 100%);
+		background-color: #79bbff;
+		border-radius: 6px;
+		border: 1px solid #84bbf3;
+		display: inline-block;
+		cursor: pointer;
+		color: #ffffff;
+		font-family: Arial;
+		font-size: 15px;
+		font-weight: bold;
+		padding: 6px 24px;
+		text-decoration: none;
+		text-shadow: 0px 1px 0px #528ecc;
+	}
+
+	.btn_submit:hover {
+		background: linear-gradient(to bottom, #378de5 5%, #79bbff 100%);
+		background-color: #378de5;
+	}
+
+	.btn_submit:active {
+		position: relative;
+		top: 1px;
+	}
+	.qna_list ul{
+		list-style-type: none;
+		display: inline-block;
+		font-size: 0px;
+		padding: 0px;
+	}
+	.qna_list li{
+		display: inline-block;
+		font-size: 16px;
+		margin-right: 50px;
+	}
+	.qna_list{
+		width: 1000px;
+		margin: 0 auto !important;
+	}
+	#btn_more{
+		width: 1000px;
+		border: none ;
+		border-radius: 5px;
+		height: 50px;
+		font-size: 18px;
+		margin-top: 10px !important;
+		display: block;
+		margin: 0 auto;
+	}
+</style>
+<!--jquery, jquery ui cdn setting-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script>
+	$(function() {
+		$(".qna_list").accordion({ 
+			collapsible: true
+		});
+		var pageNo = 1;
+		$('#btn_more').click(function(){
+			pageNo++;
+			$.ajax({
+				url : '/qna/member/more',
+				type : 'post',
+				data : 'pageNo='+pageNo,
+				success : function(data){
+					if(data.nextPage == 0){
+						$("#btn_more").off('click').text('더 이상 불러올 내용이 없습니다.');
+					}
+					var tag = "";
+					var arr = data.list;
+					for(i=0;i<arr.length;i++){
+						tag += '<h3 class="qna_title"><ul>'
+						tag += `<li>제목 : ${arr[i].title}</li>`
+						tag += `<li>작성자 : ${arr[i].writer}</li>`
+						tag += `<li>작성일 : ${arr[i].wdate}</li>`
+						switch(arr[i].status){
+							case 0:
+								tag += '<li>않읽음</li>'
+								break;
+							case 1:
+								tag += '<li>답변대기중</li>'
+								break;
+							case 2:
+								tag += '<li>답변완료</li>'
+								break;
+						}
+						tag += '</ul></h3><div><h3>문의내용</h3>'
+						tag += `<p class="qna_content">${arr[i].content}</p>`
+						tag += '<hr><h3>답변내용</h3>'
+						tag += `<p class="qna_response">${arr[i].response}</p>`
+						tag += '</div>'
+					}
+					$('.qna_list').append(tag).accordion("refresh");
+				}
+			});
+		});
+	});
+</script>
+</head>
+<body>
+	<th:block th:include="/fragments/header"></th:block>
+	<div class="container">
+		<div class="qna_form">
+			<form action="/qna/member/register">
+				<table>
+					<tr>
+						<td><input type="text" name="title" placeholder="문의글 제목을 입력하세요"><input type="hidden" name="writer" th:value="${session.dto.id}"></td>
+						<td rowspan="2">
+							<button class="btn_submit">문의하기</button>							
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<textarea name="content" placeholder="문의글 내용을 입력하세요"></textarea>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<hr>
+		<div class="qna_list">
+			<th:block th:each="dto : ${list}">
+				<h3 class="qna_title">
+					<ul>
+						<li>제목 : [[${dto.title}]]</li>
+						<li>작성자 : [[${dto.writer}]]</li>
+						<li>작성일 : [[${dto.wdate}]]</li>
+						<li th:if="${dto.status} == 0">않읽음</li>
+						<li th:if="${dto.status} == 1">답변대기중</li>
+						<li th:if="${dto.status} == 2">답변완료</li>
+					</ul>
+				</h3>
+				<div>
+					<h3>문의내용</h3>
+					<p class="qna_content">[[${dto.content}]]</p>
+					<hr>
+					<h3>답변내용</h3>
+					<p class="qna_response">[[${dto.response}]]</p>
+				</div>
+			</th:block>
+		</div>
+		<button type="button" id="btn_more">더보기</button>
+	</div>
+</body>
+</html>

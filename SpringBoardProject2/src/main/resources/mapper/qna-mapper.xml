@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.board.mapper.QnAMapper">
+	<insert id="insertMemberQnA">
+		insert into qna(qno,title,content,writer)
+		values(qna_seq.nextval,#{title},#{content},#{writer})
+	</insert>
+	<select id="selectMemberQnAList" resultType="qna" parameterType="hashMap">
+		select * from (
+		select ceil(rownum/5) as page, qno, title, content, wdate, 
+		writer, status, nvl(response,'입력된 답변이 없습니다.') as response from qna
+		where writer like #{writer}
+		order by status desc, wdate desc) where page = #{pageNo}
+	</select>
+	<select id="selectAdminQnAList" resultType="qna" parameterType="int">
+		select * from (
+		select ceil(rownum/5) as page, qno, title, content, wdate, 
+		writer, status, nvl(response,'입력된 답변이 없습니다.') as response from qna
+		order by status desc, wdate desc) where page = #{pageNo}
+	</select>
+	<select id="selectQnACount" resultType="int">
+		select count(*) from qna
+	</select>
+	<update id="updateQnAStatus" parameterType="int">
+		update qna set status = 1 where qno = #{qno} and status = 0
+	</update>
+	<select id="selectQnA" resultType="qna" parameterType="int">
+		select * from qna where qno = #{qno}
+	</select>
+	<update id="updateResponse" parameterType="hashMap">
+		update qna set status = 2, response = response || #{response}
+		where qno = #{qno}
+	</update>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

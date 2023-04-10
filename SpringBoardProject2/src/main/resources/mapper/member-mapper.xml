@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.board.mapper.MemberMapper">
+	<resultMap type="member" id="member">
+		<!-- column="조회된 결과의 컬럼명" property="클래스의 필드명"-->
+		<id column="id" property="id"/>
+		<result column="passwd" property="passwd"/>
+		<result column="name" property="name"/>
+		<result column="nick" property="nick"/>
+		<result column="grade_no" property="gradeNo"/>
+		
+	</resultMap>
+	<select id="login" parameterType="Map" resultMap="member">
+		select * from board_member where id = #{id} and passwd = #{passwd}
+	</select>
+	<!-- 
+	<select id="login" parameterType="Map" resultType="dto.MemberDTO">
+		select * from board_member where id = #{id} and passwd = #{passwd}
+	</select>
+	-->
+	<select id="selectAllMember" resultMap="member">
+		select * from board_member
+	</select>	
+	<select id="selectMember" parameterType="String" resultMap="member">
+		select * from board_member where id like #{id}
+	</select>
+	<update id="updateMember" parameterType="member">
+		update board_member set name=#{name},passwd=#{passwd},
+		nick=#{nick},grade_no=#{gradeNo}
+		where id like #{id}
+	</update>	
+	<delete id="deleteMember" parameterType="string">
+		delete from board_member where id like #{id}
+	</delete>
+	<insert id="insertMember" parameterType="member">
+		insert into board_member values(#{id},#{passwd},#{name},#{nick},#{gradeNo})
+	</insert>
+	<select id="searchMember" parameterType="map" resultMap="member">
+		select * from board_member
+		<choose>
+			<when test="search == null"></when>
+			<when test="kind.equals('gradeNo')">
+				where grade_no = #{search} 
+			</when>
+			<otherwise>
+				where ${kind} like '%' || #{search} || '%'
+			</otherwise>
+		</choose>
+		order by grade_no
+	</select>
+	<select id="selectDeleteFileList" parameterType="map" resultType="String">
+		select path from board_file where bno = #{bno} and fno in
+		<foreach collection="fno" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</select>
+</mapper>
+
+
+

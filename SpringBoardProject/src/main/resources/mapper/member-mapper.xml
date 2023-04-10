@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.board.mapper.MemberMapper">
+	<resultMap type="member" id="member">
+		<!-- column="조회된 결과의 컬럼명" property="클래스의 필드명"-->
+		<id column="id" property="id"/>
+		<result column="passwd" property="passwd"/>
+		<result column="name" property="name"/>
+		<result column="nick" property="nick"/>
+		<result column="grade_no" property="gradeNo"/>
+		
+	</resultMap>
+	<select id="login" parameterType="Map" resultMap="member">
+		select * from board_member where id = #{id} and passwd = #{passwd}
+	</select>
+	<!-- 
+	<select id="login" parameterType="Map" resultType="dto.MemberDTO">
+		select * from board_member where id = #{id} and passwd = #{passwd}
+	</select>
+	-->
+	<select id="selectAllMember" resultMap="member">
+		select * from board_member
+	</select>	
+	<select id="selectMember" parameterType="String" resultMap="member">
+		select * from board_member where id like #{id}
+	</select>
+	<update id="updateMember" parameterType="member">  <!-- mybatis-config의 typeAlias -->
+		update board_member set name=#{name},passwd=#{passwd},
+		nick=#{nick},grade_no=#{gradeNo}
+		where id like #{id}
+	</update>	
+	<delete id="deleteMember" parameterType="string">
+		delete from board_member where id like #{id}
+	</delete>
+	<insert id="insertMember" parameterType="member">
+		insert into board_member values(#{id},#{passwd},#{name},#{nick},#{gradeNo})
+	</insert>
+	
+	<select id="searchMember" parameterType="map" resultMap="member">
+		select * from board_member
+		<choose>
+			<when test="search == null"></when>
+			<when test="kind.equals('gradeNo')">
+				where grade_no = #{search} 
+			</when>
+			<otherwise>
+				where ${kind} like '%' || #{search} || '%'
+			</otherwise>
+		</choose>
+		order by grade_no
+		<!-- choose : when = if, otherwise = default -->
+	</select> 
+	
+	<select id="selectDeleteFileList" parameterType="map" resultType="String">
+		select path from board_file where bno = #{bno} and fno in
+		<foreach collection="fno" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</select>
+	<!-- foreach을 쓰는 경우는 [1,2,3,4]에 fno를 적용하면 (1,2,3,4)로 바뀌게 해준다. -->
+	<!-- 여러 값을 OR 관계로 묶어 나열하는 조건을 WHERE  절에 사용할 때 쓸 수 있는 키워드
+	IN 연산자는 조건의 범위를 지정하는 데 사용된다. 값은 콤마( , )로 구분하여 괄호 내에 묶으며, 
+	이 값 중에서 하나 이상과 일치하면 조건에 맞는 것으로 평가된다. -->
+</mapper>
